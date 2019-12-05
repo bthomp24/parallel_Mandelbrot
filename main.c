@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <omp.h>
 
 typedef struct Complex {
     long double real;
@@ -19,6 +20,8 @@ static const long double Zoom = 2;
 
 // We use the coloring schema outlined from https://solarianprogrammer.com/2013/02/28/mandelbrot-set-cpp-11/
 void calc_colors(RGB_Pixel *colors) {
+// paralyzing for loop
+#pragma omp parallel for
     for (int i = 0; i < Max_Iterations; i++) {
         double t = (double) i / Max_Iterations;
 
@@ -55,7 +58,8 @@ int main(int argc, const char **argv) {
             .real = (max_bounds.real - min_bounds.real) / Image_Width,
             .imaginary = (max_bounds.real - min_bounds.real) / Image_Height
     };
-
+// paralyzing nested for loop with collapse and scheduling
+#pragma omp parallel for collapse(2) schedule(dynamic)
     // Loop through the image pixels
     for (int img_y = 0; img_y < Image_Height; img_y++) {
         for (int img_x = 0; img_x < Image_Width; img_x++) {
